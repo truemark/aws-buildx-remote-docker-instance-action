@@ -1,3 +1,6 @@
+# Ignore IntelliJ .idea directory
+
+.idea
 # Dependency directory
 node_modules
 
