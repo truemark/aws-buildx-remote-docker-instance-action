@@ -1,105 +1,37 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# AWS Remote Docker Instance Action
 
-# Create a JavaScript Action using TypeScript
+[![LICENSE](https://img.shields.io/badge/license-BSD3-green)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/truemark/aws-ec2-run-instance-action)](https://github.com/truemark/aws-ec2-run-instance-action/releases)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/truemark/aws-ec2-run-instance-action)
+![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/truemark/aws-ec2-run-instance-action)
+![build-test](https://github.com/truemark/aws-ec2-run-instance-action/workflows/build-test/badge.svg)
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+Creates one arm64 and one amd64 ephemeral EC2 instances running a docker daemon for use by tools like docker/buildx to improve build times for multi-architecture image builds 
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
+## Examples
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+```yml
 
-## Create an action from this template
-
-Click the `Use this Template` and provide the new repo details for your action
-
-## Code in Main
-
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
-
-Install the dependencies  
-```bash
-$ npm install
 ```
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
-```
+## Inputs
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+| Name                        | Type       | Required | Description                                     |
+|-----------------------------|------------|----------|-------------------------------------------------|
+| subnet-id                   | string     | Yes      | Subnet ID to launch the instances in            |
+| security-group-id           | string     | Yes      | Security group to apply to the EC2 instances    |
+| arm64-instance-type         | string     | Yes      | Instance type to use for the arm64 EC2 instance |
+| amd64-instance-type         | string     | Yes      | Instance type to use for the amd64 EC2 instance |
+| instance-profile            | string     | No       | Instance profile to use for the EC2 instances   |
+| volume-size                 | number     | No       | Volume size in GB to use for the EC2 instances  |
+| associate-public-ip-address | boolean    | No       | Associate a public IP address to the instances  |
+| tags                        | string     | No       | Tags to apply to the EC2 instance. Format: JSON |
+| region                      | string     | Yes      | AWS region to use for the EC2 instances         |
+| key-name                    | string     | No       | SSH key name to use for the EC2 instances       |
+| ssh-public-key              | string     | No       | SSH public key to use for the EC2 instances     |
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
-
-...
-```
-
-## Change action.yml
-
-The action.yml defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
-
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
+## Outputs
+| Name              | Type       | Description                           |
+|-------------------|------------|---------------------------------------|
+| arm64-instance-id | string     | Instance ID of the arm64 EC2 instance |
+| amd64-instance-id | string     | Instance ID of the amd64 EC2 instance |

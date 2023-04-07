@@ -1,11 +1,93 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'AWS Remote Docker Action'
+description: 'Creates one arm64 and one amd64 ephemeral EC2 instances running a docker daemon for use by tools like docker/buildx to improve build times for multi-architecture image builds'
+author: 'TrueMark'
 inputs:
-  milliseconds: # change this
+  subnet-id:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'Subnet ID to launch the instances in'
+  security-group-id:
+    required: true
+    description: 'Security group to apply to the EC2 instances'
+  arm64-instance-type:
+    required: false
+    description: 'Instance type to use for the arm64 EC2 instance'
+    default: 'default-arm64'
+  amd64-instance-type:
+    required: false
+    description: 'Instance type to use for the amd64 EC2 instance'
+    default: 'default-amd64'
+  instance-profile:
+    required: false
+    description: 'Instance profile to use for the EC2 instances'
+  volume-size:
+    required: false
+    description: 'Volume size in GB to use for the EC2 instances'
+    default: '8'
+  associate-public-ip-address:
+    required: false
+    description: 'Associate a public IP address to the EC2 instances'
+    default: 'true'
+  tags:
+    required: false
+    description: 'Tags to apply to the EC2 instances'
+  region:
+    required: true
+    description: 'AWS region to use for the EC2 instances'
+  key-name:
+    required: false
+    description: 'SSH key name to use for the EC2 instances'
+  ssh-public-key:
+    required: false
+    description: 'SSH public key to use for the EC2 instances'
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: 'composite'
+  steps:
+    - name: Setup arm64 instance
+      id: arm64-instance
+      uses: truemark/aws-ec2-run-instance-action@v2
+      with:
+        security-group-id: "${{ inputs.security-group-id }}"
+        subnet-id: "${{ inputs.subnet-id }}"
+        image-id: "default-arm64"
+        instance-type: "${{ inputs.arm64-instance-type }}"
+        instance-profile: "${{ inputs.instance-profile }}"
+        region: "${{ inputs.region }}"
+        user-data: |
+          #!/usr/bin/env bash
+          yum install docker -y
+          usermod -a -G docker ec2-user
+          systemctl enable docker.service
+          systemctl start docker.service
+          mkdir -p /home/ec2-user/.ssh
+          touch /home/ec2-user/.ssh/authorized_keys
+          chmod 700 /home/ec2-user/.ssh
+          chmod 600 /home/ec2-user/.ssh/authorized_keys
+          echo "${{ inputs.ssh-public-key }}" >> /home/ec2-user/.ssh/authorized_keys
+    - name: Setup amd64 instance
+      id: amd64-instance
+      uses: truemark/aws-ec2-run-instance-action@v2
+      with:
+        security-group-id: "${{ inputs.security-group-id }}"
+        subnet-id: "${{ inputs.subnet-id }}"
+        image-id: "default-amd64"
+        instance-type: "${{ inputs.arm64-instance-type }}"
+        instance-profile: "${{ inputs.instance-profile }}"
+        region: "${{ inputs.region }}"
+        user-data: |
+          #!/usr/bin/env bash
+          yum install docker -y
+          usermod -a -G docker ec2-user
+          systemctl enable docker.service
+          systemctl start docker.service
+          mkdir -p /home/ec2-user/.ssh
+          touch /home/ec2-user/.ssh/authorized_keys
+          chmod 700 /home/ec2-user/.ssh
+          chmod 600 /home/ec2-user/.ssh/authorized_keys
+          echo "${{ inputs.ssh-public-key }}" >> /home/ec2-user/.ssh/authorized_keys
+outputs:
+  arm64-instance-id:
+    description: 'The instance ID of the arm64 EC2 instance'
+    value: "${{ steps.arm64-instance.outputs.instance-id }}"
+  amd64-instance-id:
+    description: 'The instance ID of the amd64 EC2 instance'
+    value: "${{ steps.amd64-instance.outputs.instance-id }}"
