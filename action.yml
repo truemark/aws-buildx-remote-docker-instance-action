@@ -73,7 +73,7 @@ runs:
         security-group-id: "${{ inputs.security-group-id }}"
         subnet-id: "${{ inputs.subnet-id }}"
         image-id: "default-amd64"
-        instance-type: "${{ inputs.arm64-instance-type }}"
+        instance-type: "${{ inputs.amd64-instance-type }}"
         instance-profile: "${{ inputs.instance-profile }}"
         region: "${{ inputs.region }}"
         user-data: |
