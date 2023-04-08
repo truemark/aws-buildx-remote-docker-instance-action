@@ -36,9 +36,6 @@ inputs:
   key-name:
     required: false
     description: 'SSH key name to use for the EC2 instances'
-  ssh-public-key:
-    required: false
-    description: 'SSH public key to use for the EC2 instances'
 runs:
   using: 'composite'
   steps:
@@ -65,7 +62,7 @@ runs:
           touch /home/ec2-user/.ssh/authorized_keys
           chmod 700 /home/ec2-user/.ssh
           chmod 600 /home/ec2-user/.ssh/authorized_keys
-          echo "${{ inputs.ssh-public-key }}" >> /home/ec2-user/.ssh/authorized_keys
+          echo "${{ steps.ssh-key.outputs.public-key }}" >> /home/ec2-user/.ssh/authorized_keys
     - name: Setup amd64 instance
       id: amd64-instance
       uses: truemark/aws-ec2-run-instance-action@v3
@@ -86,7 +83,7 @@ runs:
           touch /home/ec2-user/.ssh/authorized_keys
           chmod 700 /home/ec2-user/.ssh
           chmod 600 /home/ec2-user/.ssh/authorized_keys
-          echo "${{ inputs.ssh-public-key }}" >> /home/ec2-user/.ssh/authorized_keys
+          echo "${{ steps.ssh-key.outputs.public-key }}" >> /home/ec2-user/.ssh/authorized_keys
     - name: Wait for instances
       id: ec2-wait
       uses: truemark/aws-ec2-instance-wait-action@v2
