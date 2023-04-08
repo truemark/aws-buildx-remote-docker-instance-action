@@ -11,11 +11,11 @@ inputs:
   arm64-instance-type:
     required: false
     description: 'Instance type to use for the arm64 EC2 instance'
-    default: 'default-arm64'
+    default: 'c7g.large'
   amd64-instance-type:
     required: false
     description: 'Instance type to use for the amd64 EC2 instance'
-    default: 'default-amd64'
+    default: 'c6i.large'
   instance-profile:
     required: false
     description: 'Instance profile to use for the EC2 instances'
