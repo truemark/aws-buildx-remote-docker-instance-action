@@ -1,5 +1,5 @@
 name: 'AWS Remote Docker Action'
-description: 'Creates one arm64 and one amd64 ephemeral EC2 instances running a docker daemon for use by tools like docker/buildx to improve build times for multi-architecture image builds'
+description: 'Creates arm64 and amd64 EC2 instances running docker for use with docker/buildx for native multi-architecture builds'
 author: 'TrueMark'
 inputs:
   subnet-id:
