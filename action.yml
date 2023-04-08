@@ -42,9 +42,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Generate SSH Key
+      id: ssh-key
+      uses: truemark/generate-ssh-key-action@v1
     - name: Setup arm64 instance
       id: arm64-instance
-      uses: truemark/aws-ec2-run-instance-action@v2
+      uses: truemark/aws-ec2-run-instance-action@v3
       with:
         security-group-id: "${{ inputs.security-group-id }}"
         subnet-id: "${{ inputs.subnet-id }}"
@@ -65,7 +68,7 @@ runs:
           echo "${{ inputs.ssh-public-key }}" >> /home/ec2-user/.ssh/authorized_keys
     - name: Setup amd64 instance
       id: amd64-instance
-      uses: truemark/aws-ec2-run-instance-action@v2
+      uses: truemark/aws-ec2-run-instance-action@v3
       with:
         security-group-id: "${{ inputs.security-group-id }}"
         subnet-id: "${{ inputs.subnet-id }}"
@@ -84,6 +87,45 @@ runs:
           chmod 700 /home/ec2-user/.ssh
           chmod 600 /home/ec2-user/.ssh/authorized_keys
           echo "${{ inputs.ssh-public-key }}" >> /home/ec2-user/.ssh/authorized_keys
+    - name: Wait for instances
+      id: ec2-wait
+      uses: truemark/aws-ec2-instance-wait-action@v2
+      with:
+        instance-ids: ${{ steps.arm64-instance.outputs.instance-id }},${{ steps.amd64-instance.outputs.instance-id }}
+        region: "${{ inputs.region }}"
+        timeout-ms: "600000"
+    - name: Describe arm64 Instance
+      id: describe-arm64
+      uses: truemark/aws-ec2-describe-instance-action@v1
+      with:
+        instance-id: ${{ steps.arm64-instance.outputs.instance-id }}
+        region: "${{ inputs.region }}"
+    - name: Describe amd64 Instance
+      id: describe-amd64
+      uses: truemark/aws-ec2-describe-instance-action@v1
+      with:
+        instance-id: ${{ steps.amd64-instance.outputs.instance-id }}
+        region: "${{ inputs.region }}"
+    - name: SSH Known Hosts
+      id: ssh-known-hosts
+      uses: truemark/ssh-known-hosts-action@v1
+      with:
+        scan-hosts: ${{ steps.ec2-describe-arm64.outputs.public-dns-name }},${{ steps.ec2-describe-amd64.outputs.public-dns-name }}
+    - name: SSH Agent
+      id: ssh-agent
+      uses: truemark/ssh-agent-action@v1
+      with:
+        private-key-path: ${{ steps.ssh-key.outputs.private-key-path }}
+    - name: Setup Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v2
+      with:
+        driver: docker-container
+        append: |
+          - endpoint: ssh://ec2-user@${{ steps.describe-arm64.outputs.public-dns-name }}
+            platform: linux/arm64
+          - endpoint: ssh://ec2-user@${{ steps.describe-amd64.outputs.public-dns-name }}
+            platform: linux/amd64
 outputs:
   arm64-instance-id:
     description: 'The instance ID of the arm64 EC2 instance'
@@ -91,3 +133,6 @@ outputs:
   amd64-instance-id:
     description: 'The instance ID of the amd64 EC2 instance'
     value: "${{ steps.amd64-instance.outputs.instance-id }}"
+  ssh-auth-sock:
+    description: 'The socket used for the SSH agent'
+    value: "${{ steps.ssh-agent.outputs.ssh-auth-sock }}"
