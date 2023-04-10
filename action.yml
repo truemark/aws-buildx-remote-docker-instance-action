@@ -44,10 +44,10 @@ runs:
   steps:
     - name: Generate SSH Key
       id: ssh-key
-      uses: truemark/generate-ssh-key-action@v1
+      uses: truemark/generate-ssh-key-action@v2
     - name: Setup arm64 instance
       id: arm64-instance
-      uses: truemark/aws-ec2-run-instance-action@v3
+      uses: truemark/aws-ec2-run-instance-action@v4
       with:
         security-group-id: "${{ inputs.security-group-id }}"
         subnet-id: "${{ inputs.subnet-id }}"
@@ -68,7 +68,7 @@ runs:
           echo "${{ steps.ssh-key.outputs.public-key }}" >> /home/ec2-user/.ssh/authorized_keys
     - name: Setup amd64 instance
       id: amd64-instance
-      uses: truemark/aws-ec2-run-instance-action@v3
+      uses: truemark/aws-ec2-run-instance-action@v4
       with:
         security-group-id: "${{ inputs.security-group-id }}"
         subnet-id: "${{ inputs.subnet-id }}"
@@ -89,20 +89,20 @@ runs:
           echo "${{ steps.ssh-key.outputs.public-key }}" >> /home/ec2-user/.ssh/authorized_keys
     - name: Wait for instances
       id: ec2-wait
-      uses: truemark/aws-ec2-instance-wait-action@v2
+      uses: truemark/aws-ec2-instance-wait-action@v3
       with:
         instance-ids: ${{ steps.arm64-instance.outputs.instance-id }},${{ steps.amd64-instance.outputs.instance-id }}
         region: "${{ inputs.region }}"
         timeout-ms: "600000"
     - name: Describe arm64 Instance
       id: describe-arm64
-      uses: truemark/aws-ec2-describe-instance-action@v1
+      uses: truemark/aws-ec2-describe-instance-action@v2
       with:
         instance-id: ${{ steps.arm64-instance.outputs.instance-id }}
         region: "${{ inputs.region }}"
     - name: Describe amd64 Instance
       id: describe-amd64
-      uses: truemark/aws-ec2-describe-instance-action@v1
+      uses: truemark/aws-ec2-describe-instance-action@v2
       with:
         instance-id: ${{ steps.amd64-instance.outputs.instance-id }}
         region: "${{ inputs.region }}"

@@ -1,4 +1,4 @@
-# AWS Remote Docker Instance Action
+# AWS Buildx Remote Docker Instance Action
 
 [![LICENSE](https://img.shields.io/badge/license-BSD3-green)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/truemark/aws-buildx-remote-docker-instance-action)](https://github.com/truemark/aws-buildx-remote-docker-instance-action/releases)
