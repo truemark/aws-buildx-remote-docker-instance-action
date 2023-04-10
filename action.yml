@@ -1,6 +1,9 @@
 name: 'AWS Remote Docker Action'
 description: 'Creates arm64 and amd64 EC2 instances running docker for use with docker/buildx for native multi-architecture builds'
 author: 'TrueMark'
+branding:
+  icon: 'check-circle'
+  color: 'red'
 inputs:
   subnet-id:
     required: true
