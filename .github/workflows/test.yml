@@ -1,0 +1,38 @@
+name: 'build-test'
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "${{ secrets.AWS_ASSUME_ROLE }}"
+          aws-region: "us-east-2"
+      - name: Setup Buildx Remote Docker
+        id: buildx
+        uses: ./
+        with:
+          security-group-id: "${{ vars.SECURITY_GROUP_ID }}"
+          subnet-id: "${{ vars.SUBNET_ID }}"
+          instance-profile: "${{ vars.INSTANCE_PROFILE }}"
+          region: "us-east-2"
+      - name: Build images
+        run: |
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            -f amazonlinux.Dockerfile \
+            -t truemark/example:beta \
+            .
