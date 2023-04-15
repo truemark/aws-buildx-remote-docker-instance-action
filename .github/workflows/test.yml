@@ -36,3 +36,5 @@ jobs:
             -f Dockerfile \
             -t truemark/example:beta \
             .
+      - name: List builder instances
+        run: docker buildx ls
