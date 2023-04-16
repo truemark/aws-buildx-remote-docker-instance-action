@@ -47,7 +47,7 @@ runs:
       uses: truemark/generate-ssh-key-action@v2
     - name: Setup arm64 instance
       id: arm64-instance
-      uses: truemark/aws-ec2-run-instance-action@v4
+      uses: truemark/aws-ec2-run-instance-action@v5
       with:
         security-group-id: "${{ inputs.security-group-id }}"
         subnet-id: "${{ inputs.subnet-id }}"
@@ -68,7 +68,7 @@ runs:
           echo "${{ steps.ssh-key.outputs.public-key }}" >> /home/ec2-user/.ssh/authorized_keys
     - name: Setup amd64 instance
       id: amd64-instance
-      uses: truemark/aws-ec2-run-instance-action@v4
+      uses: truemark/aws-ec2-run-instance-action@v5
       with:
         security-group-id: "${{ inputs.security-group-id }}"
         subnet-id: "${{ inputs.subnet-id }}"
