@@ -113,7 +113,7 @@ runs:
         scan-hosts: ${{ steps.describe-arm64.outputs.public-dns-name }},${{ steps.describe-amd64.outputs.public-dns-name }}
     - name: Setup Buildx
       id: buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
       with:
         endpoint: ssh://ec2-user@${{ steps.describe-amd64.outputs.public-dns-name }}
         platforms: linux/amd64
